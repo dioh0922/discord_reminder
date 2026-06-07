@@ -1,0 +1,24 @@
+{
+  "name": "discord_reminder",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dioh0922/discord_reminder.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/dioh0922/discord_reminder/issues"
+  },
+  "homepage": "https://github.com/dioh0922/discord_reminder#readme",
+  "dependencies": {
+    "discord.js": "^14.26.4"
+  }
+}
