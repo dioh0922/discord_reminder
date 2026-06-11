@@ -46,7 +46,6 @@ const client = new Client({
 // 起動時の処理
 client.once(Events.ClientReady, async (readyClient) => {
   console.log(`${readyClient.user.tag} としてログインしました`);
-
   // 環境変数からチャンネルIDを取得して起動メッセージを送信
   const channelId = process.env.CHANNEL_ID;
   if (channelId) {
@@ -76,11 +75,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
       const certLog = logPath + "/cert.log";
       const mydnsLog = logPath + "/notice_mydns.jp";
 
-      const certDatePattern = '/([A-Za-z]{3} \s*\d{1,2} \s*\d{2}:\d{2}:\d{2} \s*[APM]{2} \s*[A-Z]{3} \s*\d{4})/';
       let latestCert = null;
       let latestNotice = null;        
       const certStr = fs.readFileSync(certLog, 'utf8');
-      const certMatches = certStr.match(certDatePattern);
+      const certMatches = certStr.match(/([A-Za-z]{3} \s*\d{1,2} \s*\d{2}:\d{2}:\d{2} \s*[APM]{2} \s*[A-Z]{3} \s*\d{4})/);
       if(certMatches){
         const dateTime = DateTime.fromFormat(
           certMatches[0],
@@ -89,15 +87,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
         latestCert = dateTime.toFormat('Y/m/d');
       }
 
-      const mydnsDatePattern = '/(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC)/';
       const mydnsStr = fs.readFileSync(mydnsLog, 'utf8');
-      const mydnsMatches = mydnsStr.match(mydnsDatePattern);
+      const mydnsMatches = mydnsStr.match(/(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC)/);
       if(mydnsMatches){
         const dateTime = DateTime.fromFormat(
           mydnsMatches[0],
           'yyyy/MM/dd HH:mm:ss ZZZ'
         );
-        latestNotice = dateTime.toFormat('Y/m/d');
+        latestNotice = dateTime.toFormat('Y/m/d') ?? mydnsMatches[0];
       }
       content = `【サーバー確認】certbot最新：${latestCert}\nmydns最新：${latestNotice}`;
     }else{
