@@ -71,7 +71,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     if (selectedValue === 'movie') {
       const movieData = await db.selectFrom('moviedata').selectAll().orderBy('date', 'desc').limit(5).execute();
       content = `【映画】最後に見た5つは\n${movieData.map((movie) => movie.title).join('\n')}`;
-    }else if(selectedValue === 'svr'){
+    } else if (selectedValue === 'svr') {
       const logPath = process.env.BATCH_LOG_DIR;
       const certLog = logPath + "/cert.log";
       const mydnsLog = logPath + "/notice_mydns.jp";
@@ -87,6 +87,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
             'yyyy/MM/dd HH:mm:ss ZZZ'
           );
           latestDate = dateTime.toFormat('Y/m/d');
+        }else{
+          latestDate = logStr;
         }
       }
       if(fs.existsSync(mydnsLog)){
@@ -98,6 +100,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
             'yyyy/MM/dd HH:mm:ss ZZZ'
           );
           latestDate = dateTime.toFormat('Y/m/d');
+        }else{
+          latestDate = logStr;
         }
       }
       content = `【サーバー確認】certbot最新：${latestDate}\nmydns最新：${latestDate}`;
