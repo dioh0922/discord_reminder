@@ -23,7 +23,9 @@
   "homepage": "https://github.com/dioh0922/discord_reminder#readme",
   "dependencies": {
     "discord.js": "^14.26.4",
-    "dotenv": "^17.4.2"
+    "dotenv": "^17.4.2",
+    "kysely": "^0.29.2",
+    "mysql2": "^3.22.5"
   },
   "devDependencies": {
     "@types/node": "^25.9.2",
