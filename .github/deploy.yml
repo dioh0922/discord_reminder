@@ -1,0 +1,54 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and Bundle
+        env:
+          ENV_CONTENT: ${{ secrets.ENV }}
+        run: |
+          npm run build
+          # デプロイに必要なファイルを dist に集約
+          cp package.json package-lock.json dist/
+          echo "$ENV_CONTENT" > dist/.env
+
+      - name: Deploy to Server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # dist ディレクトリ配下をすべて転送
+          source: "dist/**"
+          target: ${{ secrets.SVR_DIR }}
+          strip_components: 1
+
+      - name: Install dependencies and Restart App with PM2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ${{ secrets.SVR_DIR }}
+            npm install --production
+            pm2 reload discord-reminder || pm2 start index.js --name "discord-reminder"
