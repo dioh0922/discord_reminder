@@ -75,35 +75,29 @@ client.on(Events.InteractionCreate, async (interaction) => {
       const logPath = process.env.BATCH_LOG_DIR;
       const certLog = logPath + "/cert.log";
       const mydnsLog = logPath + "/notice_mydns.jp";
-      const datePattern = '/([A-Za-z]{3} \s*\d{1,2} \s*\d{2}:\d{2}:\d{2} \s*[APM]{2} \s*[A-Z]{3} \s*\d{4})/';
+
+      const certDatePattern = '/([A-Za-z]{3} \s*\d{1,2} \s*\d{2}:\d{2}:\d{2} \s*[APM]{2} \s*[A-Z]{3} \s*\d{4})/';
       let latestCert = null;
-      let latestNotice = null;
-      if(fs.existsSync(certLog)){
-        
-        const logStr = fs.readFileSync(certLog, 'utf8');
-        const matches = logStr.match(datePattern);
-        if(matches){
-          const dateTime = DateTime.fromFormat(
-            matches[0],
-            'yyyy/MM/dd HH:mm:ss ZZZ'
-          );
-          latestCert = dateTime.toFormat('Y/m/d');
-        }else{
-          latestCert = logStr;
-        }
+      let latestNotice = null;        
+      const certStr = fs.readFileSync(certLog, 'utf8');
+      const certMatches = certStr.match(certDatePattern);
+      if(certMatches){
+        const dateTime = DateTime.fromFormat(
+          certMatches[0],
+          'yyyy/MM/dd HH:mm:ss ZZZ'
+        );
+        latestCert = dateTime.toFormat('Y/m/d');
       }
-      if(fs.existsSync(mydnsLog)){
-        const logStr = fs.readFileSync(mydnsLog, 'utf8');
-        const matches = logStr.match(datePattern);
-        if(matches){
-          const dateTime = DateTime.fromFormat(
-            matches[0],
-            'yyyy/MM/dd HH:mm:ss ZZZ'
-          );
-          latestNotice = dateTime.toFormat('Y/m/d');
-        }else{
-          latestNotice = logStr;
-        }
+
+      const mydnsDatePattern = '/(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC)/';
+      const mydnsStr = fs.readFileSync(mydnsLog, 'utf8');
+      const mydnsMatches = mydnsStr.match(mydnsDatePattern);
+      if(mydnsMatches){
+        const dateTime = DateTime.fromFormat(
+          mydnsMatches[0],
+          'yyyy/MM/dd HH:mm:ss ZZZ'
+        );
+        latestNotice = dateTime.toFormat('Y/m/d');
       }
       content = `【サーバー確認】certbot最新：${latestCert}\nmydns最新：${latestNotice}`;
     }else{
