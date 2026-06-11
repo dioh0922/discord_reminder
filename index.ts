@@ -96,7 +96,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
         );
         latestNotice = dateTime.toFormat('Y/m/d') ?? mydnsMatches[0];
       }
-      content = `【サーバー確認】certbot最新：${latestCert}\nmydns最新：${latestNotice}`;
+      //content = `【サーバー確認】certbot最新：${latestCert}\nmydns最新：${latestNotice}`;
+      content = `【サーバー確認】certbot最新：${certMatches ? certMatches[0] : ''}\n
+      mydns最新：${mydnsMatches ? mydnsMatches[0] : ''}`;
     }else{
       content = '選択された値: ' + selectedValue;
     }
