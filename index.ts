@@ -52,7 +52,7 @@ client.once(Events.ClientReady, async (readyClient) => {
     try {
       const channel = await readyClient.channels.fetch(channelId);
       if (channel && 'send' in channel) {
-        channel.send({ content: 'Botが起動しました 🤖', components: [row] });
+        //channel.send({ content: 'Botが起動しました 🤖', components: [row] });
       }
     } catch (error) {
       console.error('起動メッセージの送信に失敗しました:', error);
@@ -78,13 +78,15 @@ client.on(Events.InteractionCreate, async (interaction) => {
       let latestCert = null;
       let latestNotice = null;        
       const certStr = fs.readFileSync(certLog, 'utf8');
-      const certMatches = certStr.match(/([A-Za-z]{3} \s*\d{1,2} \s*\d{2}:\d{2}:\d{2} \s*[APM]{2} \s*[A-Z]{3} \s*\d{4})/);
+      const certMatches = certStr.match(/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s+\w+\s+\d+\s+\d+:\d+:\d+\s+(AM|PM)\s+\w+\s+\d{4}$/gm);
+      const lastDate = certMatches?.at(-1);
       if(certMatches){
         const dateTime = DateTime.fromFormat(
-          certMatches[0],
-          'yyyy/MM/dd HH:mm:ss ZZZ'
+          (lastDate ?? ''),
+          'ccc LLL  d hh:mm:ss a z yyyy',
+          { locale: 'en', zone: 'Asia/Tokyo' }
         );
-        latestCert = dateTime.toFormat('Y/m/d');
+        latestCert = dateTime.toFormat('yyyy/MM/dd');
       }
 
       const mydnsStr = fs.readFileSync(mydnsLog, 'utf8');
@@ -92,13 +94,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
       if(mydnsMatches){
         const dateTime = DateTime.fromFormat(
           mydnsMatches[0],
-          'yyyy/MM/dd HH:mm:ss ZZZ'
+          'yyyy/MM/dd HH:mm:ss z'
         );
-        latestNotice = dateTime.toFormat('Y/m/d') ?? mydnsMatches[0];
+        latestNotice = dateTime.toFormat('yyyy/MM/dd') ?? mydnsMatches[0];
       }
       //content = `【サーバー確認】certbot最新：${latestCert}\nmydns最新：${latestNotice}`;
-      content = `【サーバー確認】certbot最新：${certMatches ? certMatches[0] : ''}\n
-      mydns最新：${mydnsMatches ? mydnsMatches[0] : ''}`;
+      content = `【サーバー確認】\ncertbot最新：${certMatches ? certMatches[0] : ''}\nmydns最新：${mydnsMatches ? mydnsMatches[0] : ''}`;
     }else{
       content = '選択された値: ' + selectedValue;
     }
