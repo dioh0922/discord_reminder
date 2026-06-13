@@ -9,6 +9,7 @@ import {
 import { db } from './src/db.js';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
+import axios from 'axios';
 import { DateTime } from 'luxon';
 // .env ファイルから環境変数を読み込み
 dotenv.config();
@@ -29,6 +30,10 @@ const selectMenu = new StringSelectMenuBuilder()
       label: 'サーバー確認',
       value: 'svr',
     },
+    {
+      label: 'TODO',
+      value: 'todo'
+    }
   ]);
 
 const row = new ActionRowBuilder<StringSelectMenuBuilder>()
@@ -52,7 +57,7 @@ client.once(Events.ClientReady, async (readyClient) => {
     try {
       const channel = await readyClient.channels.fetch(channelId);
       if (channel && 'send' in channel) {
-        //channel.send({ content: 'Botが起動しました 🤖', components: [row] });
+        channel.send({ components: [row] });
       }
     } catch (error) {
       console.error('起動メッセージの送信に失敗しました:', error);
@@ -99,7 +104,28 @@ client.on(Events.InteractionCreate, async (interaction) => {
         latestNotice = dateTime.toFormat('yyyy/MM/dd') ?? mydnsMatches[0];
       }
       content = `【サーバー確認】\ncertbot最新：${latestCert}\nmydns最新：${latestNotice}`;
-    }else{
+    } else if(selectedValue === 'todo') {
+      const res = await axios.get('http://localhost:3001/api/ai/todo');
+      if (res.status == 200) {
+        const high = res.data.todo.filter((item: any) => item.priority === 3).map((item: any) => `「${item.title}」\n${item?.reason}`).join('\n');
+        const mid = res.data.todo.filter((item: any) => item.priority === 2).map((item: any) => `「${item.title}」\n${item?.reason}`).join('\n');
+        const row = res.data.todo.filter((item: any) => item.priority === 1).map((item: any) => `「${item.title}」\n${item?.reason}`).join('\n');
+
+        content = `
+        ${res.data?.summary}
+        *高*
+        ${high}
+
+        *中*
+        ${mid}
+
+        *低*
+        ${row}
+        `
+      } else {
+        content = `TODO生成失敗:${res.status}`;
+      }
+    } else {
       content = '選択された値: ' + selectedValue;
     }
     await interaction.reply({ 
