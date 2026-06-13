@@ -68,6 +68,7 @@ client.once(Events.ClientReady, async (readyClient) => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
+  let delayFlg = false;
   if (!interaction.isStringSelectMenu()) return;
   if (interaction.customId === 'menu') {
     const selectedValue = interaction.values[0];
@@ -105,6 +106,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       }
       content = `【サーバー確認】\ncertbot最新：${latestCert}\nmydns最新：${latestNotice}`;
     } else if(selectedValue === 'todo') {
+      delayFlg = true;
       await interaction.deferReply();
       const res = await axios.get('http://localhost:3001/api/ai/todo');
       if (res.status == 200) {
@@ -129,10 +131,18 @@ client.on(Events.InteractionCreate, async (interaction) => {
     } else {
       content = '選択された値: ' + selectedValue;
     }
-    await interaction.reply({ 
-      content: content,
-      components: [row],
-    });
+    if (!delayFlg) {
+      await interaction.reply({ 
+        content: content,
+        components: [row],
+      });
+    } else {
+      // 重いときはeditReply
+      await interaction.editReply({
+        content: content,
+        components: [row]
+      });
+    }
   }
 });
 
