@@ -105,6 +105,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       }
       content = `【サーバー確認】\ncertbot最新：${latestCert}\nmydns最新：${latestNotice}`;
     } else if(selectedValue === 'todo') {
+      await interaction.deferReply();
       const res = await axios.get('http://localhost:3001/api/ai/todo');
       if (res.status == 200) {
         const high = res.data.todo.filter((item: any) => item.priority === 3).map((item: any) => `「${item.title}」\n${item?.reason}`).join('\n');
