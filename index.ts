@@ -33,6 +33,10 @@ const selectMenu = new StringSelectMenuBuilder()
     {
       label: 'TODO',
       value: 'todo'
+    },
+    {
+      label: '旅行',
+      value: 'travel'
     }
   ]);
 
@@ -128,6 +132,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
       } else {
         content = `TODO生成失敗:${res.status}`;
       }
+    } else if (selectedValue === 'travel') {
+      const travelData = await db.selectFrom('travel_todo')
+        .selectAll()
+        .where('is_done', '=', 0)
+        .where('is_deleted', '=', 0)
+        .execute();
+      content = `*行き先*\n\n${travelData.map((item: any) => item.destination).join('\n')}`;
     } else {
       content = '選択された値: ' + selectedValue;
     }

@@ -6,12 +6,19 @@ const __dirname = path.resolve();
 dotenv.config({ path: path.resolve(__dirname, '../env/.env') })
 export interface DB {
   moviedata: MovieDataTable;
+  travel_todo: TravelDataTable;
 }
 
 export interface MovieDataTable {
   id: number;
   title: string;
   date: Date;
+}
+
+export interface TravelDataTable {
+  distination: string;
+  is_done: number;
+  is_deleted: number;
 }
 
 export const db = new Kysely<DB>({
